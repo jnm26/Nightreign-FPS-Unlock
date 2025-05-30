@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 
 namespace EldenRingFPSUnlockAndMore
 {
     internal class GameData
     {
-        internal const string PROCESS_TITLE = "Elden Ring";
-        internal const string PROCESS_DESCRIPTION = "elden";
+        internal const string PROCESS_TITLE = "ELDEN RING NIGHTREIGN";
+        internal const string PROCESS_DESCRIPTION = "elden ring nightreign";
         internal static readonly string[] PROCESS_EXE_VERSION_SUPPORTED = new string[]
         {
             "1.2.0.0",
@@ -14,10 +14,10 @@ namespace EldenRingFPSUnlockAndMore
 
         /**
             <float>fFrameTick determines default frame rate limit in seconds.
-            00007FF6AEA0EF5A | EB 4F                      | jmp eldenring.7FF6AEA0EFAB                                     |
+            00007FF6AEA0EF5A | EB 4F                      | jmp nightreign.7FF6AEA0EFAB                                     |
             00007FF6AEA0EF5C | 8973 18                    | mov dword ptr ds:[rbx+18],esi                                  |
             00007FF6AEA0EF5F | C743 20 8988883C           | mov dword ptr ds:[rbx+20],3C888889                             | fFrameTick
-            00007FF6AEA0EF66 | EB 43                      | jmp eldenring.7FF6AEA0EFAB                                     |
+            00007FF6AEA0EF66 | EB 43                      | jmp nightreign.7FF6AEA0EFAB                                     |
             00007FF6AEA0EF68 | 8973 18                    | mov dword ptr ds:[rbx+18],esi                                  |
 
             00007FF6AEA0EF5F (Version 1.2.0.0)
@@ -31,7 +31,7 @@ namespace EldenRingFPSUnlockAndMore
         /**
             HARDCODED limit to 60 Hz monitor refresh rate on every resolution change. FromSoft doesn't even bother with reading the user defined Hz from driver.
             This is not just lazy, but anti-consumer as they did aknowledge user-defined Hz override in Sekiro, but not anymore in ER. Fuck you FromSoft.
-            00007FF7A30CAB25 | EB 0E                      | jmp eldenring.7FF7A30CAB35                                     |
+            00007FF7A30CAB25 | EB 0E                      | jmp nightreign.7FF7A30CAB35                                     |
             00007FF7A30CAB27 | C745 EF 3C000000           | mov dword ptr ss:[rbp-11],3C                                   | forces monitor to 60 (0x3C) Hz
             00007FF7A30CAB2E | C745 F3 01000000           | mov dword ptr ss:[rbp-D],1                                     | 1 indicates a hertz change
             00007FF7A30CAB35 | 8B87 940E0000              | mov eax,dword ptr ds:[rdi+E94]                                 |
@@ -60,10 +60,10 @@ namespace EldenRingFPSUnlockAndMore
             Conditional jump instruction that determines if 16/9 scaling for game is enforced or not, overwrite with non conditional JMP so widescreen won't get clinched.
             00007FF7A30C8D73 | 8B01                       | mov eax,dword ptr ds:[rcx]                                     |
             00007FF7A30C8D75 | 85C0                       | test eax,eax                                                   |
-            00007FF7A30C8D77 | 74 42                      | je eldenring.7FF7A30C8DBB                                      | calculation for screen scaling
+            00007FF7A30C8D77 | 74 42                      | je nightreign.7FF7A30C8DBB                                      | calculation for screen scaling
             00007FF7A30C8D79 | 44:8B59 04                 | mov r11d,dword ptr ds:[rcx+4]                                  | resolution scaling calculation...
             00007FF7A30C8D7D | 45:85DB                    | test r11d,r11d                                                 |
-            00007FF7A30C8D80 | 74 39                      | je eldenring.7FF7A30C8DBB                                      |
+            00007FF7A30C8D80 | 74 39                      | je nightreign.7FF7A30C8DBB                                      |
             00007FF7A30C8D82 | 41:8BD3                    | mov edx,r11d                                                   |
          */
         internal const string PATTERN_RESOLUTION_SCALING_FIX = "8B ?? 85 ?? 74 ?? 44 8B ?? ?? 45 85 ?? 74 ?? 41 8B";
@@ -74,7 +74,7 @@ namespace EldenRingFPSUnlockAndMore
 
         /** Game has a function to adjust FOV by a multiplier but the multiplier never changes during ordinary gameplay.
             00007FF709FD0DF0 | 44:0F28C8                  | movaps xmm9,xmm0                                               |
-            00007FF709FD0DF4 | E8 C7AC9100                | call eldenring.7FF70A8EBAC0                                    |
+            00007FF709FD0DF4 | E8 C7AC9100                | call nightreign.7FF70A8EBAC0                                    |
             00007FF709FD0DF9 | 80BB 88040000 00           | cmp byte ptr ds:[rbx+488],0                                    | -> code cave jump inject here
             00007FF709FD0E00 | 44:0F28E0                  | movaps xmm12,xmm0                                              | save FOV multiplier from xmm0 to xmm12 <- jump back here
             00007FF709FD0E04 | F344:0F1005 7BE2E102       | movss xmm8,dword ptr ds:[7FF70CDEF088]                         |
@@ -97,7 +97,7 @@ namespace EldenRingFPSUnlockAndMore
             Here Runes get reduced in case of death, so we skip the function call.
             00007FF64A420CCB | 41:B0 01                   | mov r8b,1                                                      |
             00007FF64A420CCE | 48:8BD3                    | mov rdx,rbx                                                    |
-            00007FF64A420CD1 | E8 AAB60500                | call eldenring.7FF64A47C380                                    | call DecreaseRunes()
+            00007FF64A420CD1 | E8 AAB60500                | call nightreign.7FF64A47C380                                    | call DecreaseRunes()
             00007FF64A420CD6 | 48:8B5C24 20               | mov rbx,qword ptr ss:[rsp+20]                                  |
             00007FF64A420CDB | 32C0                       | xor al,al                                                      |
             00007FF64A420CDD | 48:83C4 28                 | add rsp,28                                                     |
@@ -105,7 +105,7 @@ namespace EldenRingFPSUnlockAndMore
 
             00007FF64A420CD1 (Version 1.2.1.0)
          */
-        internal const string PATTERN_DEATHPENALTY = "41 ?? 01 48 ?? ?? E8 ?? ?? ?? ?? 48";
+        internal const string PATTERN_DEATHPENALTY = "41 ?? 01 48 ?? ?? E8 ?? ?? ?? ?? 48 ?? ?? ?? ?? 32 C0";
         internal const int PATTERN_DEATHPENALTY_OFFSET = 6;
         internal const int PATCH_DEATHPENALTY_INSTRUCTION_LENGTH = 5;
         internal static readonly byte[] PATCH_DEATHPENALTY_ENABLE = new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90 }; // nop
@@ -113,7 +113,7 @@ namespace EldenRingFPSUnlockAndMore
 
         /**
             Reference pointer pTimeRelated to TimescaleManager pointer, offset in struct to <float>fTimescale which acts as a global speed scale for almost all ingame calculations.
-            00007FF70A98B95A | E8 B1190A01                | call eldenring.7FF70BA2D310                                    |
+            00007FF70A98B95A | E8 B1190A01                | call nightreign.7FF70BA2D310                                    |
             00007FF70A98B95F | 48:8B05 F2737003           | mov rax,qword ptr ds:[7FF70E092D58]                            | pTimeRelated->[TimescaleManager+0x2D4]->fTimescale
             00007FF70A98B966 | F3:0F1088 D4020000         | movss xmm1,dword ptr ds:[rax+2D4]                              | offset TimescaleManager->fTimescale
             00007FF70A98B96E | F3:0F5988 70020000         | mulss xmm1,dword ptr ds:[rax+270]                              |
@@ -124,5 +124,40 @@ namespace EldenRingFPSUnlockAndMore
         internal const string PATTERN_TIMESCALE = "48 8B 05 ?? ?? ?? ?? F3 0F 10 88 ?? ?? ?? ?? F3 0F";
         internal const int PATTERN_TIMESCALE_OFFSET = 3;
         internal const int PATTERN_TIMESCALE_POINTER_OFFSET = 8;
+
+
+        /**
+            Controls automatic camera yaw adjust on move. xmm4 holds new yaw while rsi+150 is current one prior movement so we skip the instruction.  
+            00007FF68F98F98B | 0F29A6 50010000          | movaps xmmword ptr ds:[rsi+150],xmm4    | this will get nop'ed
+            00007FF68F98F992 | 41:0F28CF                | movaps xmm1,xmm15                       |
+            00007FF68F98F996 | 48:8BCE                  | mov rcx,rsi                             |
+            00007FF68F98F999 | E8 122F0000              | call nightreign.7FF68F9928B0             |
+            00007FF68F98F99E | 44:0FB64424 30           | movzx r8d,byte ptr ss:[rsp+30]          |
+            00007FF68F98F9A4 | 41:0F28CF                | movaps xmm1,xmm15                       |
+            00007FF68F98F9A8 | 48:8BCE                  | mov rcx,rsi                             |
+
+            00007FF68F98F98B (Version 1.2.0.0)
+         */
+        internal const string PATTERN_CAMERA_ROTATION = "0F 29 A6 ?? ?? ?? ?? 41 0F 28 CF";
+        internal const int PATTERN_CAMERA_ROTATION_OFFSET = 0;
+        internal const int PATCH_CAMERA_ROTATION_INSTRUCTION_LENGTH = 7;
+        internal static readonly byte[] PATCH_CAMERA_ROTATION_ENABLE = new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }; // nop
+
+
+        /**
+            When user presses button to lock on target but no target is in range a camera reset is triggered to center cam position. This compare decides if we need to reset or not.
+            00007FF725C201A6 | 80BE 31030000 00            | cmp byte ptr ds:[rsi+331],0                                    | Check if no target is in sight
+            00007FF725C201AD | 74 0A                       | je nightreign.7FF725C201B9                                      | 
+            00007FF725C201AF | 48:8BCE                     | mov rcx,rsi                                                    |
+            00007FF725C201B2 | E8 49010000                 | call nightreign.7FF725C20300                                    | -> call CamReset()
+            00007FF725C201B7 | EB 49                       | jmp nightreign.7FF725C20202                                     |
+            00007FF725C201B9 | 0F2886 E0000000             | movaps xmm0,xmmword ptr ds:[rsi+E0]                            |
+
+            00007FF725C201A (Version 1.3.1.0)
+         */
+        internal const string PATTERN_CAMRESET_LOCKON = "80 BE ?? ?? ?? ?? 00 74 ?? 48 ?? ?? E8 ?? ?? ?? ?? EB ?? 0F";
+        internal const int PATTERN_CAMRESET_LOCKON_OFFSET = 7;
+        internal static readonly byte[] PATCH_CAMRESET_LOCKON_ENABLE = new byte[1] { 0xEB }; // jmp
+        internal static readonly byte[] PATCH_CAMRESET_LOCKON_DISABLE = new byte[1] { 0x74 }; // je
     }
 }
