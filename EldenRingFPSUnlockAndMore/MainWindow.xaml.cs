@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows;
 using System.Threading;
 using System.Windows.Media;
@@ -31,12 +31,15 @@ namespace EldenRingFPSUnlockAndMore
         internal long _offset_resolution_scaling_fix = 0x0;
         internal long _offset_fovmultiplier = 0x0;
         internal long _offset_deathpenalty = 0x0;
+        internal long _offset_camrotation = 0x0;
+        internal long _offset_camreset = 0x0;
         internal long _offset_timescale = 0x0;
 
         internal byte[] _patch_hertzlock_disable;
         internal byte[] _patch_resolution_enable;
         internal byte[] _patch_resolution_disable;
         internal byte[] _patch_deathpenalty_disable;
+        internal byte[] _patch_camrotation_disable;
 
         internal bool _codeCave_fovmultiplier = false;
         internal const string _DATACAVE_FOV_MULTIPLIER = "dfovMultiplier";
@@ -64,6 +67,42 @@ namespace EldenRingFPSUnlockAndMore
         public MainWindow()
         {
             InitializeComponent();
+            EnsureAdminPrivileges();
+        }
+        private void EnsureAdminPrivileges()
+        {
+            if (!IsUserAdministrator())
+            {
+                // Relaunch the application with administrative privileges
+                ProcessStartInfo procInfo = new ProcessStartInfo
+                {
+                    UseShellExecute = true,
+                    WorkingDirectory = Environment.CurrentDirectory,
+                    FileName = Process.GetCurrentProcess().MainModule.FileName,
+                    Verb = "runas"
+                };
+
+                try
+                {
+                    Process.Start(procInfo);
+                    Environment.Exit(0); // Exit the current process
+                }
+                catch
+                {
+                    MessageBox.Show("The application requires administrator privileges to run. Please restart the application as an administrator.",
+                                    "Elden Ring FPS Unlocker and more",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error);
+                    Environment.Exit(0);
+                }
+            }
+        }
+
+        private bool IsUserAdministrator()
+        {
+            var identity = WindowsIdentity.GetCurrent();
+            var principal = new WindowsPrincipal(identity);
+            return principal.IsInRole(WindowsBuiltInRole.Administrator);
         }
 
         /// <summary>
@@ -84,7 +123,7 @@ namespace EldenRingFPSUnlockAndMore
             }
             GC.KeepAlive(mutex);
 
-            if (!IsAdministrator())
+            if (!IsUserAdministrator())
             {
                 MessageBox.Show("Please run this utility as administrator!", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 Environment.Exit(0);
@@ -240,7 +279,7 @@ namespace EldenRingFPSUnlockAndMore
 
             if (!File.Exists(gameExePath))
             {
-                gamePath = path ?? GetApplicationPath("ELDEN RING");
+                gamePath = path ?? GetApplicationPath("ELDEN RING NIGHTRTEIGN");
                 if (gamePath == null || (!File.Exists(Path.Combine(gamePath, $"{Properties.Settings.Default.GameName}.exe")) && !File.Exists(Path.Combine(gamePath, "GAME", $"{Properties.Settings.Default.GameName}.exe"))))
                     gameExePath = PromptForGamePath();
                 else
@@ -274,32 +313,35 @@ namespace EldenRingFPSUnlockAndMore
             }
 
             // start steam
-            Process[] procList = Process.GetProcessesByName("steam");
-            if (procList.Length == 0)
+            if (cbDisableSteamCheck.IsChecked == false)
             {
-                ProcessStartInfo siSteam = new ProcessStartInfo
+                Process[] procList = Process.GetProcessesByName("steam");
+                if (procList.Length == 0)
                 {
-                    WindowStyle = ProcessWindowStyle.Minimized,
-                    Verb = "open",
-                    FileName = "steam://open/console",
-                };
-                Process procSteam = new Process
-                {
-                    StartInfo = siSteam
-                };
-                procSteam.Start();
-                await WaitForProgram("steam", 6000);
-                await Task.Delay(4000);
+                    ProcessStartInfo siSteam = new ProcessStartInfo
+                    {
+                        WindowStyle = ProcessWindowStyle.Minimized,
+                        Verb = "open",
+                        FileName = "steam://open/console",
+                    };
+                    Process procSteam = new Process
+                    {
+                        StartInfo = siSteam
+                    };
+                    procSteam.Start();
+                    await WaitForProgram("steam", 6000);
+                    await Task.Delay(4000);
+                }
             }
 
-            // start the game
+            // start the game with admin privileges
             ProcessStartInfo siGame = new ProcessStartInfo
             {
                 WindowStyle = ProcessWindowStyle.Hidden,
-                Verb = "runas",
-                FileName = "cmd.exe",
+                Verb = "runas", // Ensure game is run as administrator
+                FileName = Path.Combine(gamePath, $"{Properties.Settings.Default.GameName}.exe"),
                 WorkingDirectory = gamePath,
-                Arguments = $"/C \"{Properties.Settings.Default.GameName}.exe -noeac\""
+                Arguments = $"/C \"nrsc_launcher.exe -noeac\""
             };
             Process procGameStarter = new Process
             {
@@ -453,6 +495,22 @@ namespace EldenRingFPSUnlockAndMore
                     _offset_deathpenalty = 0x0;
             }
 
+            _offset_camrotation = patternScan.FindPattern(GameData.PATTERN_CAMERA_ROTATION) + GameData.PATTERN_CAMERA_ROTATION_OFFSET;
+            Debug.WriteLine($"cam rotation found at: 0x{_offset_camrotation:X}");
+            if (!IsValidAddress(_offset_camrotation))
+                _offset_camrotation = 0x0;
+            else
+            {
+                _patch_camrotation_disable = new byte[GameData.PATCH_DEATHPENALTY_INSTRUCTION_LENGTH];
+                if (!WinAPI.ReadProcessMemory(_gameAccessHwndStatic, _offset_camrotation, _patch_camrotation_disable, GameData.PATCH_CAMERA_ROTATION_INSTRUCTION_LENGTH, out _))
+                    _offset_camrotation = 0x0;
+            }
+
+            _offset_camreset = patternScan.FindPattern(GameData.PATTERN_CAMRESET_LOCKON) + GameData.PATTERN_CAMRESET_LOCKON_OFFSET;
+            Debug.WriteLine($"cam reset found at: 0x{_offset_camreset:X}");
+            if (!IsValidAddress(_offset_camreset))
+                _offset_camreset = 0x0;
+
             patternScan.Dispose();
         }
 
@@ -494,6 +552,20 @@ namespace EldenRingFPSUnlockAndMore
                 UpdateStatus("death penalty not found...", Brushes.Red);
                 LogToFile("death penalty not found...");
                 cbDeathPenalty.IsEnabled = false;
+            }
+
+            if (_offset_camrotation == 0x0)
+            {
+                UpdateStatus("cam rotation not found...", Brushes.Red);
+                LogToFile("cam rotation not found...");
+                cbCamRotation.IsEnabled = false;
+            }
+
+            if (_offset_camreset == 0x0)
+            {
+                UpdateStatus("cam reset not found...", Brushes.Red);
+                LogToFile("cam reset not found...");
+                cbCamLockReset.IsEnabled = false;
             }
 
             if (_offset_timescale == 0x0)
@@ -543,6 +615,8 @@ namespace EldenRingFPSUnlockAndMore
             _offset_resolution = 0x0;
             _offset_resolution_scaling_fix = 0x0;
             _offset_deathpenalty = 0x0;
+            _offset_camrotation = 0x0;
+            _offset_camreset = 0x0;
             _offset_timescale = 0x0;
             _startup = false;
             _patch_hertzlock_disable = null;
@@ -568,14 +642,18 @@ namespace EldenRingFPSUnlockAndMore
         /// </summary>
         private void PatchGame()
         {
-            List<bool> results = new List<bool>();
             if (!CanPatchGame())
                 return;
-            results.Add(PatchFramelock());
-            results.Add(PatchFov());
-            results.Add(PatchWidescreen());
-            results.Add(PatchDeathPenalty());
-            results.Add(PatchGameSpeed());
+            List<bool> results = new List<bool>
+            {
+                PatchFramelock(),
+                PatchFov(),
+                PatchWidescreen(),
+                PatchCamRotation(),
+                PatchCamReset(),
+                PatchDeathPenalty(),
+                PatchGameSpeed()
+            };
             if (results.Contains(true))
                 UpdateStatus("game patched!", Brushes.Green);
         }
@@ -691,6 +769,44 @@ namespace EldenRingFPSUnlockAndMore
                 WriteBytes(_offset_deathpenalty, _patch_deathpenalty_disable);
                 return false;
             }
+            return true;
+        }
+
+        /// <summary>
+        /// Patches game's camera rotation
+        /// </summary>
+        private bool PatchCamRotation()
+        {
+            if (!cbCamRotation.IsEnabled || _offset_camrotation == 0x0 || !CanPatchGame()) return false;
+            if (cbCamRotation.IsChecked == true)
+            {
+                WriteBytes(_offset_camrotation, GameData.PATCH_CAMERA_ROTATION_ENABLE);
+            }
+            else if (cbCamRotation.IsChecked == false)
+            {
+                WriteBytes(_offset_camrotation, _patch_camrotation_disable);
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Patches the game's camera centering on lock-on
+        /// </summary>
+        private bool PatchCamReset()
+        {
+            if (!cbCamLockReset.IsEnabled || _offset_camreset == 0x0 || !CanPatchGame()) return false;
+            if (cbCamLockReset.IsChecked == true)
+            {
+                WriteBytes(_offset_camreset, GameData.PATCH_CAMRESET_LOCKON_ENABLE);
+            }
+            else if (cbCamLockReset.IsChecked == false)
+            {
+                WriteBytes(_offset_camreset, GameData.PATCH_CAMRESET_LOCKON_DISABLE);
+                return false;
+            }
+
             return true;
         }
 
@@ -813,7 +929,7 @@ namespace EldenRingFPSUnlockAndMore
                 if (installDir != null && installDir.Contains(p_name))
                 {
                     // Not needed but just an additional check to see if eldenring.exe is in the InstallLocation path
-                    if (File.Exists(installDir + @"\Game\eldenring.exe"))
+                    if (File.Exists(installDir + @"\Game\nightreign.exe"))
                         return true;
                 }
             }
@@ -835,7 +951,7 @@ namespace EldenRingFPSUnlockAndMore
         {
             MessageBox.Show("Couldn't find game installation path!\n\n" +
                             "Please specify the installation path yourself...", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-            string gameExePath = OpenFile("Select eldenring.exe", "C:\\", new[] { "*.exe" }, new[] { "Elden Ring Executable" }, true);
+            string gameExePath = OpenFile("Select nightreign seamless.exe", "C:\\", new[] { "*.exe" }, new[] { "Nightreign Executable" }, true);
             if (string.IsNullOrEmpty(gameExePath) || !File.Exists(gameExePath))
                 Environment.Exit(0);
             var fileInfo = FileVersionInfo.GetVersionInfo(gameExePath);
