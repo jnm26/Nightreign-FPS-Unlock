@@ -65,8 +65,8 @@
                     </TextBlock>
                 </Expander>
                 <Label HorizontalAlignment="Right" FontSize="12 px" TabIndex="22">
-                    <Hyperlink NavigateUri="https://github.com/uberhalit/EldenRingFpsUnlockAndMore" RequestNavigate="Hyperlink_RequestNavigate" Cursor="Hand">
-                        v1.1.0.0 - by uberhalit
+                    <Hyperlink NavigateUri="https://github.com/zofrea1/Nightreign-FPS-Unlock" RequestNavigate="Hyperlink_RequestNavigate" Cursor="Hand">
+                        by uberhalit, updated for nightreign by zofrea
                     </Hyperlink>
                 </Label>
             </StackPanel>
