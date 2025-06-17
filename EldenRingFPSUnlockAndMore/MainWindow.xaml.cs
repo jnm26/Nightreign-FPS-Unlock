@@ -277,17 +277,20 @@ namespace EldenRingFPSUnlockAndMore
             string gameExePath = Properties.Settings.Default.GamePath;
             string gamePath;
 
+            // Determine which executable to use
+            string exeName = Properties.Settings.Default.SeamlessTicked ? "nrsc_launcher.exe" : "nightreign.exe";
+
             if (!File.Exists(gameExePath))
             {
                 gamePath = path ?? GetApplicationPath("ELDEN RING NIGHTRTEIGN");
-                if (gamePath == null || (!File.Exists(Path.Combine(gamePath, $"{Properties.Settings.Default.GameName}.exe")) && !File.Exists(Path.Combine(gamePath, "GAME", $"{Properties.Settings.Default.GameName}.exe"))))
+                if (gamePath == null || (!File.Exists(Path.Combine(gamePath, exeName)) && !File.Exists(Path.Combine(gamePath, "GAME", exeName))))
                     gameExePath = PromptForGamePath();
                 else
                 {
-                    if (File.Exists(Path.Combine(gamePath, "GAME", $"{Properties.Settings.Default.GameName}.exe")))
-                        gameExePath = Path.Combine(gamePath, "GAME", $"{Properties.Settings.Default.GameName}.exe");
-                    else if (File.Exists(Path.Combine(gamePath, $"{Properties.Settings.Default.GameName}.exe")))
-                        gameExePath = Path.Combine(gamePath, $"{Properties.Settings.Default.GameName}.exe");
+                    if (File.Exists(Path.Combine(gamePath, "GAME", exeName)))
+                        gameExePath = Path.Combine(gamePath, "GAME", exeName);
+                    else if (File.Exists(Path.Combine(gamePath, exeName)))
+                        gameExePath = Path.Combine(gamePath, exeName);
                     else
                         gameExePath = PromptForGamePath();
                 }
@@ -304,7 +307,7 @@ namespace EldenRingFPSUnlockAndMore
             // create steam_appid
             try
             {
-                File.WriteAllText(Path.Combine(gamePath, "steam_appid.txt"), "1245620");
+                File.WriteAllText(Path.Combine(gamePath, "steam_appid.txt"), "2622380");
             }
             catch
             {
@@ -339,16 +342,16 @@ namespace EldenRingFPSUnlockAndMore
             {
                 WindowStyle = ProcessWindowStyle.Hidden,
                 Verb = "runas", // Ensure game is run as administrator
-                FileName = Path.Combine(gamePath, $"{Properties.Settings.Default.GameName}.exe"),
+                FileName = Path.Combine(gamePath, exeName),
                 WorkingDirectory = gamePath,
-                Arguments = $"/C \"nrsc_launcher.exe -noeac\""
+                Arguments = exeName == "nightreign.exe" ? "-noeac" : string.Empty
             };
             Process procGameStarter = new Process
             {
                 StartInfo = siGame
             };
             procGameStarter.Start();
-            await WaitForProgram(Properties.Settings.Default.GameName, 10000);
+            await WaitForProgram(Path.GetFileNameWithoutExtension(exeName), 10000);
             await Task.Delay(4000);
             procGameStarter.Close();
             _startup = false;
@@ -647,12 +650,12 @@ namespace EldenRingFPSUnlockAndMore
             List<bool> results = new List<bool>
             {
                 PatchFramelock(),
-                PatchFov(),
-                PatchWidescreen(),
-                PatchCamRotation(),
-                PatchCamReset(),
-                PatchDeathPenalty(),
-                PatchGameSpeed()
+                // PatchFov(),
+                // PatchWidescreen(),
+                // PatchCamRotation(),
+                // PatchCamReset(),
+                // PatchDeathPenalty(),
+                // PatchGameSpeed()
             };
             if (results.Contains(true))
                 UpdateStatus("game patched!", Brushes.Green);
@@ -950,14 +953,14 @@ namespace EldenRingFPSUnlockAndMore
         private string PromptForGamePath()
         {
             MessageBox.Show("Couldn't find game installation path!\n\n" +
-                            "Please specify the installation path yourself...", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-            string gameExePath = OpenFile("Select nightreign seamless.exe", "C:\\", new[] { "*.exe" }, new[] { "Nightreign Executable" }, true);
+                            "Please specify the installation path yourself...", "Nightreign FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            string gameExePath = OpenFile("Select nightreign.exe", "C:\\", new[] { "*.exe" }, new[] { "Nightreign Executable" }, true);
             if (string.IsNullOrEmpty(gameExePath) || !File.Exists(gameExePath))
                 Environment.Exit(0);
             var fileInfo = FileVersionInfo.GetVersionInfo(gameExePath);
             if (!fileInfo.FileDescription.ToLower().Contains(GameData.PROCESS_DESCRIPTION))
             {
-                MessageBox.Show("Invalid game file!", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show("Invalid game file!", "Nightreign FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 Environment.Exit(0);
             }
             Properties.Settings.Default.GameName = Path.GetFileNameWithoutExtension(gameExePath);
