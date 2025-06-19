@@ -22,8 +22,11 @@ namespace EldenRingFPSUnlockAndMore
 
             00007FF6AEA0EF5F (Version 1.2.0.0)
          */
-        internal const string PATTERN_FRAMELOCK = "C7 ?? ?? ?? 88 88 3C EB"; // first byte can can be 88/90 instead of 89 due to precision loss on floating point numbers
-        internal const int PATTERN_FRAMELOCK_OFFSET = 3; // offset to byte array from found position
+        // Updated patterns for latest game version
+        // Previous FPS pattern: "C7 ?? ?? ?? 88 88 3C EB"
+        internal const string PATTERN_FRAMELOCK = "C7 ?? ?? ?? 88 88 3C E9"; // updated FPS pattern
+        internal const int PATTERN_FRAMELOCK_OFFSET = 3; // keep offset unless new info
+        // Remove or update fuzzy if not needed
         internal const string PATTERN_FRAMELOCK_FUZZY = "89 73 ?? C7 ?? ?? ?? ?? ?? ?? EB ?? 89 73";
         internal const int PATTERN_FRAMELOCK_OFFSET_FUZZY = 6;
 
@@ -83,8 +86,8 @@ namespace EldenRingFPSUnlockAndMore
 
             00007FF709FD0E00 (Version 1.2.0.0)
          */
-        internal const string PATTERN_FOV_MULTIPLIER = "80 BB ?? ?? ?? ?? 00 44 ?? ?? E0 F3 44 ?? ?? ?? ?? ?? ?? ?? 45";
-        internal const int PATTERN_FOV_MULTIPLIER_OFFSET = 0;
+        internal const string PATTERN_FOV_MULTIPLIER = "80 BB ?? ?? ?? ?? 00 44 ?? ?? E0 F3 44 ?? ?? ?? ?? ?? ?? ?? 45"; // reverted to previous FOV pattern
+        internal const int PATTERN_FOV_MULTIPLIER_OFFSET = 0; // keep offset unless new info
         internal const int INJECT_FOV_MULTIPLIER_OVERWRITE_LENGTH = 7;
         internal static readonly byte[] INJECT_FOV_MULTIPLIER_SHELLCODE = new byte[]
         {
