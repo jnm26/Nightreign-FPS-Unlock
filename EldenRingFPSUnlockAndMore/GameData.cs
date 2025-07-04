@@ -42,7 +42,8 @@ namespace EldenRingFPSUnlockAndMore
             
             00007FF7A30CAB27 (Version 1.2.0.0)
          */
-        internal const string PATTERN_HERTZLOCK = "EB ?? C7 ?? ?? 3C 00 00 00 C7 ?? ?? 01 00 00 00";
+        // internal const string PATTERN_HERTZLOCK = "EB ?? C7 ?? ?? 3C 00 00 00 C7 ?? ?? 01 00 00 00"; (This one still works when using VSync off fullscreen and deleting resolutions using CRU)
+        internal const string PATTERN_HERTZLOCK = "C7 45 ?? 3C 00 00 00 C7 45 ?? 01 00 00 00"; // updated pattern for latest game version for support while running in fullscreen 
         internal const int PATTERN_HERTZLOCK_OFFSET = 2;
         internal const int PATTERN_HERTZLOCK_OFFSET_INTEGER1 = 3;
         internal const int PATTERN_HERTZLOCK_OFFSET_INTEGER2 = 10;
