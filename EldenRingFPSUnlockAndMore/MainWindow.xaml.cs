@@ -416,8 +416,9 @@ namespace EldenRingFPSUnlockAndMore
                 if (!IsValidAddress(_offset_framelock))
                     _offset_framelock = 0x0;
             }
-
-            _offset_hertzlock = patternScan.FindPattern(GameData.PATTERN_HERTZLOCK) + GameData.PATTERN_HERTZLOCK_OFFSET;
+            // previous
+            // _offset_hertzlock = patternScan.FindPattern(GameData.PATTERN_HERTZLOCK) + GameData.PATTERN_HERTZLOCK_OFFSET;
+            _offset_hertzlock = patternScan.FindPattern(GameData.PATTERN_HERTZLOCK);
             Debug.WriteLine($"HertzLock found at: 0x{_offset_hertzlock:X}");
             if (!IsValidAddress(_offset_hertzlock))
                 _offset_hertzlock = 0x0;
@@ -655,7 +656,7 @@ namespace EldenRingFPSUnlockAndMore
                 // PatchCamRotation(),
                 // PatchCamReset(),
                 // PatchDeathPenalty(),
-                // PatchGameSpeed()
+                PatchGameSpeed()
             };
             if (results.Contains(true))
                 UpdateStatus("game patched!", Brushes.Green);
